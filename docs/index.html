@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Creator Wasm</title>
+</head>
+<body>
+    <h1>QR Creator WebAssembly Demo</h1>
+    <input type="text" id="text-input" placeholder="Enter text" />
+    <button id="generate">Generate QR Code</button>
+    <img id="qr-code" />
+    <script type="module">
+        import init, { create_qr_code } from "./pkg/qr_code_encoder.js";
+
+        async function main() {
+            await init();
+            const generateButton = document.getElementById("generate");
+            const textInput = document.getElementById("text-input");
+            const qrCodeImg = document.getElementById("qr-code");
+
+            generateButton.addEventListener("click", () => {
+                const text = textInput.value;
+                const base64Image = create_qr_code(text);
+                qrCodeImg.src = `data:image/png;base64,${base64Image}`;
+            });
+        }
+
+        main();
+    </script>
+</body>
+</html>
+
