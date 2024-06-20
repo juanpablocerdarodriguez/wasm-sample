@@ -12,7 +12,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Set up Rust
       uses: actions-rs/toolchain@v1
@@ -23,24 +23,30 @@ jobs:
     - name: Install wasm-pack
       run: cargo install wasm-pack
 
-    - name: Build project
+    - name: Build the project
       run: wasm-pack build --target web
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v2
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v1
       with:
-        node-version: '14'
+        path: 'docs'  # The folder containing your built files
 
-    - name: Install dependencies
-      run: npm install -g http-server
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
 
     - name: Deploy to GitHub Pages
-      run: |
-        mv pkg docs/
-        cd docs
-        git init
-        git config user.name 'github-actions[bot]'
-        git config user.email 'github-actions[bot]@users.noreply.github.com'
-        git add .
-        git commit -m 'Deploy to GitHub Pages'
-        git push --force --quiet "https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" master:gh-pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+      with:
+        artifact_name: 'github-pages'
